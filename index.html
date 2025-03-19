@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Multi-Step Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script>
+        let currentPage = 0;
+
+        function showPage(pageIndex) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach((page, index) => {
+                page.classList.toggle('hidden', index !== pageIndex);
+            });
+            currentPage = pageIndex;
+        }
+
+        function applyTheme(theme) {
+            localStorage.setItem('selectedTheme', theme);
+            const buttons = document.querySelectorAll("[id^='apply-button-']");
+            
+            buttons.forEach(button => {
+                button.innerText = 'Apply';
+                button.classList.remove('bg-green-500', 'text-white');
+                button.classList.add('border', 'border-blue-500', 'text-blue-500');
+            });
+            
+            const selectedButton = document.getElementById('apply-button-' + theme);
+            selectedButton.innerText = 'Applied';
+            selectedButton.classList.add('bg-green-500', 'text-white');
+            selectedButton.classList.remove('border', 'border-blue-500', 'text-blue-500');
+        }
+
+        function goToNextPage() {
+            if (currentPage < 2) {
+                showPage(currentPage + 1);
+            }
+        }
+
+        function goBack() {
+            if (currentPage > 0) {
+                showPage(currentPage - 1);
+            }
+        }
+
+        function updateDescription() {
+            document.getElementById('product-description-display').innerText = 
+                document.getElementById('product-description').value;
+        }
+
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function(){
+                document.getElementById('product-image-display').src = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        function updateProductName() {
+            document.getElementById('product-name-display').innerText = 
+                document.getElementById('product-name').value;
+        }
+
+        function updatePricingDetails() {
+            const netPrice = parseFloat(document.getElementById('net-price').value) || 0;
+            const listPrice = parseFloat(document.getElementById('list-price').value) || 0;
+            const discountPercentage = parseFloat(document.getElementById('discount-percentage').value) || 0;
+            const gstRate = parseFloat(document.getElementById('gst-rate').value) || 0;
+            const shippingCharges = parseFloat(document.getElementById('shipping-charges').value) || 0;
+            const stockLevel = parseInt(document.getElementById('stock-level').value) || 0;
+
+            const discountedPrice = listPrice - (listPrice * (discountPercentage / 100));
+            const finalPrice = discountedPrice + (discountedPrice * (gstRate / 100)) + shippingCharges;
+
+            document.getElementById('net-price-display').innerText = `RS ${netPrice.toFixed(2)}`;
+            document.getElementById('list-price-display').innerText = `RS ${listPrice.toFixed(2)}`;
+            document.getElementById('gst-rate-display').innerText = `${gstRate.toFixed(2)}%`;
+            document.getElementById('shipping-charges-display').innerText = `RS ${shippingCharges.toFixed(2)}`;
+            document.getElementById('stock-level-display').innerText = stockLevel;
+            document.getElementById('final-price-display').innerText = `RS ${finalPrice.toFixed(2)}`;
+        }
+
+        window.onload = function() {
+            showPage(0); // Show the first page on load
+        };
+    </script>
+</head>
+<body class="bg-gray-100">
+    <!-- Page 1: Theme Selection -->
+    <div class="page">
+        <div class="container mx-auto p-6">
+            <h1 class="text-3xl font-bold mb-6">Apply a theme</h1>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg shadow-lg p-4">
+                    <img alt="Bags theme preview" class="rounded-t-lg mb-4" height="300" src="https://storage.googleapis.com/a1aa/image/B-no0XFDeMFKvEJ9wdpfQXmWR8CV7G9jZ9tgFEQow3Q.jpg" width="400"/>
+                    <h2 class="text-xl font-bold mb-2">Bags theme <span class="text-gray-500">(recommended)</span></h2>
+                    <div class="flex justify-between items-center">
+                        <button id="apply-button-bags" class="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center" onclick="applyTheme('bags')">Applied</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-4">
+                    <img alt="Flex theme preview" class="rounded-t-lg mb-4" height="300" src="https://storage.googleapis.com/a1aa/image/559W-XrpMHiVBPgUeaDorkYOEHNcXysxlng0qwhiXUE.jpg" width="400"/>
+                    <h2 class="text-xl font-bold mb-2">Flex theme</h2>
+                    <div class="flex justify-between items-center">
+                        <button id="apply-button-flex" class="border border-blue-500 text-blue-500 px-4 py-2 rounded-lg" onclick="applyTheme('flex')">Apply</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-4">
+                    <img alt="Chic theme preview" class="rounded-t-lg mb-4" height="300" src="https://storage.googleapis.com/a1aa/image/vSmvh_4usaXHero2hJ2ayhfdSza6ekym-RfThq99zAk.jpg" width="400"/>
+                    <h2 class="text-xl font-bold mb-2">Chic theme</h2>
+                    <div class="flex justify-between items-center">
+                        <button id="apply-button-chic" class="border border-blue-500 text-blue-500 px-4 py-2 rounded-lg" onclick="applyTheme('chic')">Apply</button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button class="bg-blue-500 text-white px-6 py-2 rounded-lg" onclick="goToNextPage()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 2: Add Product Type -->
+    <div class="page hidden">
+        <div class="flex-grow flex items-center justify-center">
+            <div class="bg-white p-8 rounded-lg shadow-lg flex flex-col md:flex-row w-full max-w-4xl">
+                <div class="md:w-1/2">
+                    <h1 class="text-2xl font-bold mb-6">Let's add a type, Category and Sub-category</h1>
+                    <form>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold mb-2" for="product-type">Add a product type</label>
+                            <input class="w-full px-3 py-2 border border-gray-300 rounded-lg" type="text" id="product-type" placeholder="eg - books">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold mb-2" for="category">Add a category (optional)</label>
+                            <input class="w-full px-3 py-2 border border-gray-300 rounded-lg" type="text" id="category" placeholder="eg - Academic book">
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-semibold mb-2" for="sub-category">Add a sub-category (optional)</label>
+                            <input class="w-full px-3 py-2 border border-gray-300 rounded-lg" type="text" id="sub-category" placeholder="eg - medical book">
+                        </div>
+                        <div class="flex justify-between">
+                            <button type="button" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg" onclick="goBack()">Back</button>
+                            <button type="button" class="px-4 py-2 bg-blue-500 text-white rounded-lg" onclick="goToNextPage()">Next</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="md:w-1/2 mt-8 md:mt-0 md:ml-8 bg-green-100 p-6 rounded-lg">
+                    <div class="flex flex-col items-center">
+                        <div class="bg-blue-500 text-white px-4 py-2 rounded-lg mb-4">Product type</div>
+                        <div class="flex flex-col items-center">
+                            <i class="fas fa-arrow-down text-gray-700 mb-4"></i>
+                            <div class="bg-yellow-400 text-black px-4 py-2 rounded-lg mb-4">Category</div>
+                            <i class="fas fa-arrow-down text-gray-700 mb-4"></i>
+                            <div class="bg-yellow-400 text-black px-4 py-2 rounded-lg mb-4">Sub-Category</div>
+                            <i class="fas fa-arrow-right text-gray-700 mb-4"></i>
+                            <div class="bg-blue-200 text-black px-4 py-2 rounded-lg">Product</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 3: Add Product Details -->
+    <div class="page hidden">
+        <div class="max-w-7xl mx-auto bg-white p-8 rounded-lg shadow-md">
+            <h1 class="text-3xl font-bold mb-6">Let's add your first product</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Left Column -->
+                <div class="max-h-[600px] overflow-y-scroll p-4 border rounded-lg">
+                    <h2 class="text-xl font-semibold mb-4">Basic Details</h2>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Product Name</label>
+                        <input class="w-full border p-2 rounded-md" id="product-name" oninput="updateProductName()" placeholder="eg - anatomy book" type="text"/>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Product Description</label>
+                        <textarea class="w-full border p-2 rounded-md" id="product-description" oninput="updateDescription()" rows="3"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Add Image(s)</label>
+                        <input accept="image/*" class="block w-full" onchange="previewImage(event)" type="file"/>
+                    </div>
+                    <div class="mb-4">
+                        <input class="mr-2" id="sku-code" type="checkbox"/>
+                        <label class="text-sm font-medium text-gray-700" for="sku-code">This product has an SKU code</label>
+                        <input class="w-full border p-2 rounded-md mt-2" placeholder="eg - PROD0001" type="text"/>
+                    </div>
+                    <h2 class="text-xl font-semibold mt-6 mb-4">Pricing Details</h2>
+                    <div class="mb-4">
+                        <input checked="" class="mr-2" id="gst-inclusive" type="checkbox"/>
+                        <label class="text-sm font-medium text-gray-700" for="gst-inclusive">Price inclusive of GST</label>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Net Price</label>
+                            <input class="w-full border p-2 rounded-md" id="net-price" oninput="updatePricingDetails()" placeholder="eg - 80" type="text"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">List Price</label>
+                            <input class="w-full border p-2 rounded-md" id="list-price" oninput="updatePricingDetails()" placeholder="eg - 100" type="text"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Discount Percentage</label>
+                            <input class="w-full border p-2 rounded-md" id="discount-percentage" oninput="updatePricingDetails()" placeholder="eg - 40" type="text"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">GST Rate</label>
+                            <input class="w-full border p-2 rounded-md" id="gst-rate" oninput="updatePricingDetails()" placeholder="eg - 20" type="text"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Shipping Charges (if any)</label>
+                            <input class="w-full border p-2 rounded-md" id="shipping-charges" oninput="updatePricingDetails()" placeholder="eg - 40" type="text"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Stock Level</label>
+                            <input class="w-full border p-2 rounded-md" id="stock-level" oninput="updatePricingDetails()" placeholder="eg - 110" type="text"/>
+                        </div>
+                    </div>
+                </div>
+                <!-- Right Column -->
+                <div>
+                    <div class="bg-white p-4 rounded-lg shadow-lg">
+                        <img alt="Product image of a cactus in a pot" class="w-full h-64 object-cover rounded-lg mb-4" height="400" id="product-image-display" src="https://storage.googleapis.com/a1aa/image/P1FmA1VQGmTPo2bzi2S5Z7E-zfHUo2816afrNwaDAbM.jpg" width="300"/>
+                        <h3 class="text-xl font-semibold mb-2" id="product-name-display">Product title</h3>
+                        <p class="text-gray-700 mb-4" id="product-description-display"></p>
+                        <div class="text-gray-700">
+                            <div>
+                                <span class="line-through" id="list-price-display">RS 100</span>
+                                <span class="font-bold" id="net-price-display">RS 90</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-between mt-4">
+                <button class="bg-gray-300 px-4 py-2 rounded-md" onclick="goBack()">Back</button>
+                <button class="bg-blue-500 text-white px-4 py-2 rounded-md" onclick="goToNextPage()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center p-4 mt-8 bg-gray-200 w-full">
+        <p>&copy; Copyright Mallikarjun</p>
+    </footer>
+</body>
+</html>
